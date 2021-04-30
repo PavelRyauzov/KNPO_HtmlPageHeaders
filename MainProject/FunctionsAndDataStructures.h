@@ -3,7 +3,22 @@
 
 #include <QList>
 
-using namespace std;
+class Exception : public std::exception
+{
+public:
+    Exception (QString msg)
+    {
+        message = msg;
+    }
+
+    const char * what() const throw ()
+    {
+        return message.toStdString().c_str();
+    }
+
+private:
+    QString message;
+};
 
 struct Header
 {
@@ -15,7 +30,6 @@ struct Header
 struct NestingBlock
 {
     QList<Header> headers;
-
 };
 
 /*! Удалить все комментарии в html-коде
