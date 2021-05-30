@@ -161,6 +161,172 @@ Header parseHeaderTag(QString headerTag)
     return parsedHeader;
 }
 
+QStringList createTableOfContentsText(QStringList htmlCode)
+{
+    // Получить теги заголовков "H" из HTML-кода...
+    QStringList headerTags = getHeaderTags(htmlCode);
+
+    // Создать список заголовков (переменных структуры Header, содержащих уровень вложенности тега "H" и текст внутри него)
+    QList<Header> headers;
+
+    // Для каждого найденного ранее тега заголовка
+    for (int i = 0; i < headerTags.length(); i++)
+    {
+        // Разобрать тег заголовка: получить его уровень вложенности и текст...
+        headers << parseHeaderTag(headerTags[i]);
+    }
+
+    // Получить блоки вложенности, построенные на основе вложенности тегов "H"
+    QList<NestingBlock> nestingBlocks;
+
+    nestingBlocks = getNestingBlocks(headers);
+
+    // Создать текст, в который будем помещать результат - текст оглавления заданной HTML-страницы на основании заголовков “H”, с учетом вложенности
+    QStringList tableOfContents;
+
+    // Проанализировать каждый блок вложенности и добавить отступы к тексту заголовков, на основе их вложенности...
+    // Для каждого блока вложенности
+    for (int i = 0; i < nestingBlocks.length(); i++)
+    {
+        // Создать вектор, который будет содержать список уровней вложенности всех, имеющихся в блоке тегов
+        QVector<int> headerLevels;
+
+        // Для каждого заголовка
+        for (int k = 0; k < nestingBlocks[i].headers.length(); k++)
+        {
+            // Записать уровень вложенности текущего заголовка в вектор
+            headerLevels <<  nestingBlocks[i].headers[k].nestingLevel;
+        }
+
+        // Отсортировать вектор в порядке возрастания
+        bubbleSort(headerLevels);
+
+        // Удалить все повторяющиеся элементы в векторе
+        removeDuplicateItems(headerLevels);
+
+       // Для каждого элемента вектора, начиная со второго
+       for (int k = 1; k < headerLevels.length(); k++)
+       {
+           // Для каждого заголовка, начиная со 2
+           for (int j = 1; j < nestingBlocks[i].headers.length(); j++)
+           {
+               // Если уровень вложенности текущего заголовка равен значению текущего элемента вектора
+               if (nestingBlocks[i].headers[j].nestingLevel == headerLevels[k])
+               {
+                 // Записать количество отступов в начале строки с текстом заголовка равное номеру элемента вектора
+                 for (int g = 0; g < k; g++)
+                 {
+                    nestingBlocks[i].headers[j].content = "\t" + nestingBlocks[i].headers[j].content;
+                 }
+               }
+           }
+       }
+    }
+
+    // Записать в выделенный под результат текст - текст всех заголовков
+    // Для каждого блока вложенности
+    for (int i = 0; i < nestingBlocks.length(); i++)
+    {
+        // Для каждого заголовка
+        for (int j = 0; j < nestingBlocks[i].headers.length(); j++)
+        {
+            // Записать в строку выделенного под результат текста, строку с текстом текущего заголовка
+            tableOfContents << nestingBlocks[i].headers[j].content;
+        }
+    }
+
+    // Вернуть текст с результатом
+    return tableOfContents;
+}
+
+QList<NestingBlock> getNestingBlocks(QList<Header> headers)
+{
+    // Выделить список под результат - блоки вложенности
+    QList<NestingBlock> blocks;
+
+    // Считать, что поиск блоков не завершен
+    int end = 0;
+
+    // Пока поиск блоков не завершен
+    while (end == 0)
+    {
+        // Выделить временную переменную под блок (переменную структуры NestingBlock)
+        NestingBlock tempBlock;
+
+        // Записать первый заголовок во временный блок
+        tempBlock.headers << headers[0];
+
+        // Для каждого заголовка, начиная со второго
+        for (int j = 1; j < headers.length(); j++)
+        {
+            // Если уровень вложенности текущего заголовка больше, чем уровень вложенности первого
+            if (headers[j].nestingLevel > headers[0].nestingLevel)
+            {
+                // Записать текущий заголовок во временный блок
+                tempBlock.headers << headers[j];
+            }
+            // Если уровень вложенности текущего тега заголовка меньше или равен уровню вложенности первого или дошли до последнего тега
+            if (headers[j].nestingLevel <= headers[0].nestingLevel || j == headers.length() - 1)
+            {
+                // Если дошли до последнего тега
+                if (j == headers.length() - 1)
+                {
+                   // Считать, что поиск блоков завершен
+                   end = 1;
+                }
+
+                // Записать в список, выделенный для результата временный блок
+                blocks << tempBlock;
+
+                // Для каждого заголовка во временном блоке
+                for (int k = 0; k < tempBlock.headers.length(); k++)
+                {
+                    // Удалить заголовок
+                    headers.removeFirst();
+                }
+
+                // Прервать цикл
+                break;
+            }
+        }
+    }
+
+    // Вернуть список с результатом
+    return blocks;
+}
+
+void bubbleSort(QVector<int> &vector)
+{
+    int temp;
+
+    for (int k = 0; k < vector.length() - 1; k++)
+    {
+        for (int g = 0; g < vector.length() - k - 1; g++)
+        {
+            if (vector[g] > vector[g + 1])
+            {
+                temp = vector[g];
+                vector[g] = vector[g + 1];
+                vector[g + 1] = temp;
+            }
+        }
+    }
+}
+
+void removeDuplicateItems(QVector<int> &vector)
+{
+    for (int k = 0; k < vector.length(); k++)
+    {
+        if (vector.count(vector[k]) > 1)
+        {
+            while (vector.count(vector[k]) != 1)
+            {
+                vector.removeOne(vector[k]);
+            }
+        }
+    }
+}
+
 void getFileContent(QString path, QStringList &fileContent)
 {
     QFile mFile(path);

@@ -66,6 +66,25 @@ Header parseHeaderTag(QString headerTag);
  */
 QStringList createTableOfContentsText(QStringList htmlCode);
 
+/*! Получить блоки вложенности, построенные на основе вложенности тегов "H"
+ * \brief getNestingBlocks
+ * \param[in] headers - список заголовков (переменных структуры Header, содержащих уровень вложенности тега "H" и текст внутри него)
+ * \return список переменных структуры NestingBlock, содержащих блоки вложенности, построенные на основе вложенности тегов "H"
+ */
+QList<NestingBlock> getNestingBlocks(QList<Header> headers);
+
+/*! Отсортировать вектор целых чисел по возрастанию (алгоритм сортировки пузырьком)
+ * \brief bubbleSort
+ * \param[in|out] vector - вектор целых чисел | отсортированный в порядке возрастания вектор целых чисел
+ */
+void bubbleSort(QVector<int> &vector);
+
+/*! Удалить повторяющиеся элементы в векторе целых чисел
+ * \brief removeDuplicateItems
+ * \param vector [in|out] vector - вектор целых чисел | вектор целых чисел, не содержащий повторяющиеся элементы
+ */
+void removeDuplicateItems(QVector<int> &vector);
+
 /*! Сгенерировать html-страницу с полученным на вход оглавлением
  * \brief generateHtmlPageTableOfContents
  * \param[in] tableOfContents - текст, содержащий оглавление
