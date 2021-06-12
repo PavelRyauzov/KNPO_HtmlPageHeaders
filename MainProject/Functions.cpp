@@ -327,6 +327,79 @@ void removeDuplicateItems(QVector<int> &vector)
     }
 }
 
+QStringList generateHtmlPageTableOfContents(QStringList tableOfContents)
+{
+    // Добавить в начало списка строк, содержащего текст оглавления открывающийся тег ul
+    tableOfContents.insert(0, "<ul>");
+
+    // Добавить в конец списка строк, содержащего текст оглавления закрывающийся тег ul
+    tableOfContents << "</ul>";
+
+    // Для каждой строки текста с оглавлением кроме первой и последней
+    for (int i = 1; i < tableOfContents.length() - 1; i++)
+    {
+        // Считать чисто отступов равным нулю
+        int countTabs = 0;
+
+        // Если текущая строка содержит отступы
+        if (tableOfContents[i].contains("\t"))
+        {
+            int j = 0;
+
+            // Пока текущий символ строки содержит отступы в начале
+            while (tableOfContents[i][j] == '\t')
+            {
+                // Увеличить количеств отступов на 1
+                countTabs++;
+
+                // Перейти к следующему символу строки
+                j++;
+            }
+
+            // Удалить отсупы в начале
+            tableOfContents[i].remove(0, countTabs);
+        }
+
+        // Если количество отступов равно нулю
+        if (countTabs == 0)
+        {
+            // Добавить в начало текущей строки открывающийся тег li, а в конец закрывающийся тег li
+            tableOfContents[i] = "<li>" + tableOfContents[i] + "</li>";
+        }
+        // Иначе если количество отступов больше нуля
+        else if (countTabs > 0)
+        {
+            // Добавить в начало текущей строки открывающийся тег li, а в конец закрывающийся тег li
+            tableOfContents[i] = "<li>" + tableOfContents[i] + "</li>";
+
+            // Повторить некоторое число раз равное количеству отступов
+            for (int j = 0; j < countTabs; j++)
+            {
+                // Добавить в начало текущей строки открывающийся тег ul, а в конец закрывающийся тег ul
+                tableOfContents[i] = "<ul>" + tableOfContents[i] + "</ul>";
+            }
+        }
+    }
+
+    // Добавить остальную часть html-страницы
+    tableOfContents.insert(0, "<body>");
+    tableOfContents.insert(0, "</head>");
+    tableOfContents.insert(0, "</style>");
+    tableOfContents.insert(0, "}");
+    tableOfContents.insert(0, "list-style: none;");
+    tableOfContents.insert(0, "li {");
+    tableOfContents.insert(0, "<style>");
+    tableOfContents.insert(0, "<title>Output data</title>");
+    tableOfContents.insert(0, "<meta charset=\"utf-8\">");
+    tableOfContents.insert(0, "<head>");
+    tableOfContents.insert(0, "<html>");
+    tableOfContents.insert(0, "<!DOCTYPE html>");
+    tableOfContents << "</html>";
+
+    // Возвращаем результат - сгенерированная html-страница с оглавлением
+    return tableOfContents;
+}
+
 void getFileContent(QString path, QStringList &fileContent)
 {
     QFile mFile(path);
