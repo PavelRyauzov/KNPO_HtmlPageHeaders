@@ -444,3 +444,14 @@ void writeContentToFile(QString path, QStringList content)
     }
 }
 
+void deleteAllCommentsInHtmlCode(QStringList &htmlCode)
+{
+    QRegExp rxCommentHtml("<!--([^.]*)-->");
+
+   // Для каждой строки html-кода
+   for (int i = 0; i < htmlCode.length(); i++)
+   {
+       // Удалить комментарий html
+       htmlCode[i].remove(rxCommentHtml);
+   }
+}
