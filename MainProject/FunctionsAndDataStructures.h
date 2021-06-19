@@ -6,18 +6,24 @@
 class Exception : public std::exception
 {
 public:
-    Exception (QString msg)
+    Exception (QString msg, QString error_code)
     {
         message = msg;
+        errorCode = error_code;
     }
 
     const char * what() const throw ()
     {
         return message.toStdString().c_str();
     }
+    QString gerErrorCode()
+    {
+        return errorCode;
+    }
 
 private:
     QString message;
+    QString errorCode;
 };
 
 struct Header

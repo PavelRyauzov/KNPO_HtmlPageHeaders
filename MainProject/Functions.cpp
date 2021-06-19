@@ -24,7 +24,7 @@ bool isHTMLCodeCorrect(QStringList htmlCode)
     // Если не найден тег с html-кодом не содержит тег html
     if ((lastPos = rxHtmlTag.indexIn(htmlCodeInOneStr, lastPos)) == -1)
     {
-        throw Exception("Не опознан HTML-код");
+        throw Exception("Не опознан HTML-код", "5");
     }
 
     // Проверить, содержит ли текст теги заголовков "H"...
@@ -36,7 +36,7 @@ bool isHTMLCodeCorrect(QStringList htmlCode)
     // Если не найден тег заголовка "H"
     if ((lastPos = rxHeaderTags.indexIn(htmlCodeInOneStr, lastPos)) == -1)
     {
-        throw Exception("HTML-код не содержит тегов заголовков \"H\"");
+        throw Exception("HTML-код не содержит тегов заголовков \"H\"", "6");
     }
 
     // Проверить, не содержит ли текст непарные теги заголовков или вложенные теги "H"...
@@ -54,7 +54,7 @@ bool isHTMLCodeCorrect(QStringList htmlCode)
         // Если их позиции не равны
         if (lastPos != pos)
         {
-            throw Exception("HTML-код содержит непарные теги заголовков или содержит теги заголовков с вложенными тегами \"H\"");
+            throw Exception("HTML-код содержит непарные теги заголовков или содержит теги заголовков с вложенными тегами \"H\"", "7");
         }
 
         // Считать начальной позицией для поиска позицию, следующую за найденным парным тегом заголовка
@@ -478,23 +478,30 @@ void getFileContent(QString path, QStringList &fileContent)
 {
     QFile mFile(path);
 
-    // Если файл не удалось открыть
-    if (!mFile.open(QFile::ReadOnly | QFile::Text))
+    if(path.contains(".html"))
     {
-        throw Exception("Не удалось открыть входной файл");
+        // Если файл не удалось открыть
+        if (!mFile.open(QFile::ReadOnly | QFile::Text))
+        {
+            throw Exception("Не удалось открыть входной файл", "1");
+        }
+        else
+        {
+            QTextStream stream(&mFile);
+            QString buffer;
+
+            while (stream.readLineInto((&buffer)))
+            {
+                fileContent << buffer;
+            }
+
+            mFile.flush();
+            mFile.close();
+        }
     }
     else
     {
-        QTextStream stream(&mFile);
-        QString buffer;
-
-        while (stream.readLineInto((&buffer)))
-        {
-            fileContent << buffer;
-        }
-
-        mFile.flush();
-        mFile.close();
+        throw Exception("Отсутствует нужное расширение входного файла: .html", "3");
     }
 }
 
@@ -502,19 +509,26 @@ void writeContentToFile(QString path, QStringList content)
 {
     QFile file(path);
 
-    // Если файл не удалось открыть
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    if(path.contains(".html"))
     {
-       throw Exception("Не удалось открыть выходной файл");
+        // Если файл не удалось открыть
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+           throw Exception("Не удалось открыть выходной файл", "2");
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            foreach(QString line, content)
+            {
+                 out << line << Qt::endl;
+            }
+        }
     }
     else
     {
-        QTextStream out(&file);
-
-        foreach(QString line, content)
-        {
-             out << line << Qt::endl;
-        }
+        throw Exception("Отсутствует нужное расширение выходного файла: .html", "4");
     }
 }
 
